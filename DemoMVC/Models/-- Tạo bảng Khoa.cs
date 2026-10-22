@@ -1,0 +1,159 @@
+-- Tạo bảng Khoa
+CREATE TABLE Khoa (
+    ma_khoa VARCHAR(10) PRIMARY KEY,
+    ten_khoa NVARCHAR(100) NOT NULL
+);
+
+-- Tạo bảng SinhVien
+CREATE TABLE SinhVien (
+    ma_sinh_vien VARCHAR(10) PRIMARY KEY,
+    ho_ten NVARCHAR(100) NOT NULL,
+    nam_nhap_hoc INT NOT NULL,
+    ma_he_dao_tao VARCHAR(2) NOT NULL,
+    ma_nganh VARCHAR(2) NOT NULL,
+    ma_khoa VARCHAR(10) NOT NULL,
+    CONSTRAINT FK_SinhVien_Khoa 
+        FOREIGN KEY (ma_khoa) REFERENCES Khoa(ma_khoa)
+);
+
+-- Nhập dữ liệu các khoa của Trường Đại học Mỏ - Địa chất
+INSERT INTO Khoa (ma_khoa, ten_khoa) VALUES
+('CNTT', N'Khoa Công nghệ Thông tin'),
+('DC',   N'Khoa Địa chất'),
+('Mỏ',   N'Khoa Kỹ thuật Mỏ'),
+('KT',   N'Khoa Kinh tế');
+using System.Data;
+using System.Data.SqlClient;
+
+public class DatabaseHelper
+{
+    private string connectionString = 
+        @"Data Source=localhost;Initial Catalog=QLSinhVien;Integrated Security=True";
+
+    public SqlConnection GetConnection()
+    {
+        return new SqlConnection(connectionString);
+    }
+
+    public DataTable ExecuteQuery(string query, SqlParameter[] parameters = null)
+    {
+        using (SqlConnection conn = GetConnection())
+        {
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                if (parameters != null)
+                    cmd.Parameters.AddRange(parameters);
+
+                using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                {
+                    DataTable dt = new DataTable();
+                    adapter.Fill(dt);
+                    return dt;
+                }
+            }
+        }
+    }
+
+    public int ExecuteNonQuery(string query, SqlParameter[] parameters = null)
+    {
+        using (SqlConnection conn = GetConnection())
+        {
+            conn.Open();
+            using (SqlCommand cmd = new SqlCommand(query, conn))
+            {
+                if (parameters != null)
+                    cmd.Parameters.AddRange(parameters);
+                return cmd.ExecuteNonQuery();
+            }
+        }
+    }
+}
+public class SinhVienService
+{
+    private DatabaseHelper db = new DatabaseHelper();
+
+    // Hàm sinh mã sinh viên tự động
+    public string SinhMaSinhVien(int namNhapHoc, string maHeDaoTao, string maNganh)
+    {
+        // 1. Lấy 2 số cuối của năm nhập học
+        string namNgan = (namNhapHoc % 100).ToString("00");
+
+        // 2. Truy vấn số thứ tự lớn nhất hiện có (cùng khóa, cùng hệ, cùng ngành)
+        string query = @"
+            SELECT MAX(CAST(SUBSTRING(ma_sinh_vien, 7, 4) AS INT)) 
+            FROM SinhVien 
+            WHERE nam_nhap_hoc = @namNhapHoc 
+              AND ma_he_dao_tao = @maHeDaoTao 
+              AND ma_nganh = @maNganh";
+
+        SqlParameter[] parameters = {
+            new SqlParameter("@namNhapHoc", namNhapHoc),
+            new SqlParameter("@maHeDaoTao", maHeDaoTao),
+            new SqlParameter("@maNganh", maNganh)
+        };
+
+        object result = db.ExecuteScalar(query, parameters);
+        int soThuTuMoi = (result == DBNull.Value) ? 1 : Convert.ToInt32(result) + 1;
+
+        // 3. Ghép mã hoàn chỉnh
+        string maSinhVien = namNgan + maHeDaoTao + maNganh + soThuTuMoi.ToString("0000");
+        return maSinhVien;
+    }
+
+    // Thêm sinh viên mới
+    public bool ThemSinhVien(string hoTen, int namNhapHoc, string maHeDaoTao, 
+                             string maNganh, string maKhoa)
+    {
+        // Tự động sinh mã
+        string maSinhVien = SinhMaSinhVien(namNhapHoc, maHeDaoTao, maNganh);
+
+        string query = @"
+            INSERT INTO SinhVien (ma_sinh_vien, ho_ten, nam_nhap_hoc, 
+                                  ma_he_dao_tao, ma_nganh, ma_khoa)
+            VALUES (@maSinhVien, @hoTen, @namNhapHoc, 
+                    @maHeDaoTao, @maNganh, @maKhoa)";
+
+        SqlParameter[] parameters = {
+            new SqlParameter("@maSinhVien", maSinhVien),
+            new SqlParameter("@hoTen", hoTen),
+            new SqlParameter("@namNhapHoc", namNhapHoc),
+            new SqlParameter("@maHeDaoTao", maHeDaoTao),
+            new SqlParameter("@maNganh", maNganh),
+            new SqlParameter("@maKhoa", maKhoa)
+        };
+
+        return db.ExecuteNonQuery(query, parameters) > 0;
+    }
+}
+private void btnThem_Click(object sender, EventArgs e)
+{
+    try
+    {
+        SinhVienService service = new SinhVienService();
+
+        // Lấy thông tin từ form
+        string hoTen = txtHoTen.Text;
+        int namNhapHoc = int.Parse(cboNamNhapHoc.Text);
+        string maHeDaoTao = "21"; // Hệ ĐH chính quy
+        string maNganh = "05";    // Ngành CNTT
+        string maKhoa = "CNTT";   // Mã khoa
+
+        // Gọi hàm thêm sinh viên
+        bool success = service.ThemSinhVien(hoTen, namNhapHoc, maHeDaoTao, maNganh, maKhoa);
+
+        if (success)
+        {
+            MessageBox.Show("Thêm sinh viên thành công!");
+            // Load lại danh sách
+            LoadDataGrid();
+        }
+        else
+        {
+            MessageBox.Show("Thêm sinh viên thất bại!");
+        }
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show("Lỗi: " + ex.Message);
+    }
+}

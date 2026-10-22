@@ -1,0 +1,10 @@
+E:\New folder\DemoMVC\obj\Debug\net10.0\rpswa.dswa.cache.json
+E:\New folder\DemoMVC\obj\Debug\net10.0\DemoMVC.GeneratedMSBuildEditorConfig.editorconfig
+E:\New folder\DemoMVC\obj\Debug\net10.0\DemoMVC.AssemblyInfoInputs.cache
+E:\New folder\DemoMVC\obj\Debug\net10.0\DemoMVC.AssemblyInfo.cs
+E:\New folder\DemoMVC\obj\Debug\net10.0\DemoMVC.csproj.CoreCompileInputs.cache
+E:\New folder\DemoMVC\obj\Debug\net10.0\DemoMVC.MvcApplicationPartsAssemblyInfo.cache
+E:\New folder\DemoMVC\obj\Debug\net10.0\DemoMVC.RazorAssemblyInfo.cache
+E:\New folder\DemoMVC\obj\Debug\net10.0\DemoMVC.RazorAssemblyInfo.cs
+E:\New folder\DemoMVC\obj\Debug\net10.0\DemoMVC.sourcelink.json
+E:\New folder\DemoMVC\obj\Debug\net10.0\DemoMVC.csproj.AssemblyReference.cache
