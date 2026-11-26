@@ -1,0 +1,17 @@
+@model Student
+<div class="modal-content">
+    <form asp-action="@(string.IsNullOrEmpty(Model.StudentCode) ? "Create" : "Edit")"
+          asp-route-id="@Model.StudentCode" method="post" data-ajax-form>
+        <div class="modal-header"><h2 class="modal-title fs-5">@(string.IsNullOrEmpty(Model.StudentCode) ? "Thêm sinh viên" : "Cập nhật sinh viên")</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <div class="modal-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3"><label asp-for="StudentCode" class="form-label"></label><input asp-for="StudentCode" class="form-control" readonly="@(string.IsNullOrEmpty(Model.StudentCode) ? null : "readonly")" /><span asp-validation-for="StudentCode" class="text-danger"></span></div>
+            <div class="mb-3"><label asp-for="FullName" class="form-label"></label><input asp-for="FullName" class="form-control" /><span asp-validation-for="FullName" class="text-danger"></span></div>
+            <div class="mb-3"><label asp-for="BirthYear" class="form-label"></label><input asp-for="BirthYear" class="form-control" /><span asp-validation-for="BirthYear" class="text-danger"></span></div>
+            <div class="mb-3"><label asp-for="Email" class="form-label"></label><input asp-for="Email" class="form-control" /><span asp-validation-for="Email" class="text-danger"></span></div>
+            <div class="mb-3"><label asp-for="Phone" class="form-label"></label><input asp-for="Phone" class="form-control" /><span asp-validation-for="Phone" class="text-danger"></span></div>
+            <div class="mb-3"><label asp-for="FacultyCode" class="form-label"></label><select asp-for="FacultyCode" asp-items="ViewBag.Faculties" class="form-select"><option value="">-- Chọn khoa --</option></select><span asp-validation-for="FacultyCode" class="text-danger"></span></div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary">Lưu</button></div>
+    </form>
+</div>

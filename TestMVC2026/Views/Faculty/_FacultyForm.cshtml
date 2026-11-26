@@ -1,0 +1,12 @@
+@model Faculty
+<div class="modal-content">
+    <form asp-action="@(string.IsNullOrEmpty(Model.Code) ? "Create" : "Edit")" asp-route-id="@Model.Code" method="post" data-ajax-form>
+        <div class="modal-header"><h2 class="modal-title fs-5">@(string.IsNullOrEmpty(Model.Code) ? "Thêm khoa" : "Cập nhật khoa")</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <div class="modal-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3"><label asp-for="Code" class="form-label"></label><input asp-for="Code" class="form-control" readonly="@(string.IsNullOrEmpty(Model.Code) ? null : "readonly")" /><span asp-validation-for="Code" class="text-danger"></span></div>
+            <div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger"></span></div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary">Lưu</button></div>
+    </form>
+</div>

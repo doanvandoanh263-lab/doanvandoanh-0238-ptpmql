@@ -1,0 +1,11 @@
+@page
+@model TestMVC2026.Areas.Identity.Pages.Account.ConfirmEmailModel
+@{
+    ViewData["Title"] = "Xác thực email";
+}
+<div class="row justify-content-center py-4">
+    <div class="col-md-7">
+        <div class="alert alert-info">@Model.StatusMessage</div>
+        <a class="btn btn-primary" asp-page="./Login">Đăng nhập</a>
+    </div>
+</div>

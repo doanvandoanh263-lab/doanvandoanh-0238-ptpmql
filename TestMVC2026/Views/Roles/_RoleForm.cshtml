@@ -1,0 +1,14 @@
+@model RoleFormViewModel
+<div class="modal-content">
+    <form asp-action="@(string.IsNullOrEmpty(Model.Id) ? "Create" : "Edit")" method="post" data-ajax-form>
+        <div class="modal-header"><h2 class="modal-title fs-5">@(string.IsNullOrEmpty(Model.Id) ? "Tạo role" : "Cập nhật role")</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <div class="modal-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input asp-for="Id" type="hidden" />
+            <label for="name" class="form-label">Tên role</label>
+            <input asp-for="Name" id="name" class="form-control" maxlength="256" required />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary">Lưu</button></div>
+    </form>
+</div>

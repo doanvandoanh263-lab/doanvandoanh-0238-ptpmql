@@ -1,0 +1,22 @@
+@model PagedResult<Student>
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light"><tr><th>Mã sinh viên</th><th>Họ và tên</th><th>Năm sinh</th><th>Email</th><th>Khoa</th><th class="text-end">Thao tác</th></tr></thead>
+        <tbody>
+        @foreach (var student in Model.Items)
+        {
+            <tr>
+                <td>@student.StudentCode</td><td>@student.FullName</td><td>@student.BirthYear</td><td>@student.Email</td><td>@student.Faculty?.Name</td>
+                <td class="text-end text-nowrap">
+                    <button class="btn btn-sm btn-outline-primary" data-modal-url="@Url.Action("Edit", new { id = student.StudentCode })">Sửa</button>
+                    <form class="d-inline" asp-action="Delete" asp-route-id="@student.StudentCode" method="post" data-ajax-delete data-delete-label="@student.FullName">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (Model.Items.Count == 0) { <tr><td colspan="6" class="text-center text-muted py-4">Không tìm thấy sinh viên.</td></tr> }
+        </tbody>
+    </table>
+</div>
+<partial name="_Pager" model="Model" />

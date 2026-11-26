@@ -1,0 +1,15 @@
+@model PagedResult<Faculty>
+<div class="table-responsive"><table class="table table-hover align-middle">
+    <thead class="table-light"><tr><th>Mã khoa</th><th>Tên khoa</th><th>Số sinh viên</th><th class="text-end">Thao tác</th></tr></thead>
+    <tbody>
+    @foreach (var faculty in Model.Items)
+    {
+        <tr><td>@faculty.Code</td><td>@faculty.Name</td><td>@faculty.Students.Count</td><td class="text-end text-nowrap">
+            <button class="btn btn-sm btn-outline-primary" data-modal-url="@Url.Action("Edit", new { id = faculty.Code })">Sửa</button>
+            <form class="d-inline" asp-action="Delete" asp-route-id="@faculty.Code" method="post" data-ajax-delete data-delete-label="@faculty.Name"><button class="btn btn-sm btn-outline-danger" type="submit">Xóa</button></form>
+        </td></tr>
+    }
+    @if (Model.Items.Count == 0) { <tr><td colspan="4" class="text-center text-muted py-4">Không tìm thấy khoa.</td></tr> }
+    </tbody>
+</table></div>
+<partial name="_Pager" model="Model" />

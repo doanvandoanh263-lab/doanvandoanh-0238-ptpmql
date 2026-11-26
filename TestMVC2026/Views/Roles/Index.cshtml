@@ -1,0 +1,16 @@
+@model PagedResult<RoleRow>
+@{
+    ViewData["Title"] = "Role & phân quyền";
+}
+<div class="d-flex justify-content-between align-items-center mb-4"><div><h1 class="h2 mb-1">Role &amp; phân quyền</h1><p class="text-muted mb-0">Quản lý role và cấp quyền theo từng action.</p></div></div>
+<div class="card shadow-sm mb-4"><div class="card-body">
+    <button class="btn btn-primary" type="button" data-modal-url="@Url.Action("Create")">Tạo role</button>
+</div></div>
+<div class="card shadow-sm"><div class="card-body">
+    <form asp-action="Index" method="get" class="row g-2 mb-3" data-grid-search>
+        <div class="col-sm-8 col-md-6"><input class="form-control" type="search" name="searchString" value="@Model.SearchString" placeholder="Tìm role..." /></div>
+        <div class="col-auto"><button class="btn btn-outline-primary" type="submit">Tìm kiếm</button></div>
+        <div class="col-auto"><button class="btn btn-outline-secondary" type="button" data-grid-clear>Xóa lọc</button></div>
+    </form>
+    <div data-grid-results><partial name="_RoleList" model="Model" /></div>
+</div></div>

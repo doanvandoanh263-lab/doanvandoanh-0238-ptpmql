@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Nhập Excel";
+}
+<div class="mb-4"><h1 class="h2 mb-1">Nhập dữ liệu từ Excel</h1><p class="text-muted">Nhập dữ liệu khoa và sinh viên. Các bảng Identity không bị thay đổi.</p></div>
+<div class="card shadow-sm"><div class="card-body">
+    <p>Tệp .xlsx cần có ba trang tính: <code>Khoa</code> (Code, Name), <code>SinhVien</code> (StudentCode, FullName, BirthYear, Email, Phone, FacultyCode) và <code>RolePermissions</code> (RoleName, Controller, Action). Role trong trang phân quyền phải được tạo sẵn.</p>
+    <a class="btn btn-outline-primary mb-4" asp-action="Template">Tải tệp mẫu</a>
+    <form asp-action="Upload" method="post" enctype="multipart/form-data" data-confirm-import>
+        <div class="mb-3"><label class="form-label" for="file">Tệp Excel (.xlsx, tối đa 10 MB)</label><input class="form-control" type="file" id="file" name="file" accept=".xlsx" required /></div>
+        <fieldset class="mb-3">
+            <legend class="fs-6">Chọn cách nhập</legend>
+            <div class="form-check"><input class="form-check-input" type="radio" name="mode" id="mode-append" value="Append" checked /><label class="form-check-label" for="mode-append">Ghi bổ sung — giữ dữ liệu hiện có; mã trùng sẽ bị từ chối.</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="mode" id="mode-replace" value="Replace" /><label class="form-check-label" for="mode-replace">Thay thế — xóa dữ liệu sinh viên và khoa hiện có trước khi nhập.</label></div>
+        </fieldset>
+        <input type="hidden" name="confirmed" value="false" />
+        <button class="btn btn-primary" type="submit">Tải lên và nhập dữ liệu</button>
+    </form>
+</div></div>
+@section Scripts {
+    <script>
+        document.querySelector("[data-confirm-import]").addEventListener("submit", function (event) {
+            const mode = this.querySelector("[name='mode']:checked").value;
+            const message = mode === "Replace"
+                ? "Xác nhận THAY THẾ: toàn bộ dữ liệu khoa, sinh viên và quyền action hiện tại sẽ bị xóa."
+                : "Xác nhận GHI BỔ SUNG dữ liệu. Các mã đã tồn tại sẽ làm toàn bộ tệp bị từ chối.";
+            if (!confirm(message)) {
+                event.preventDefault();
+                return;
+            }
+            this.querySelector("[name='confirmed']").value = "true";
+        });
+    </script>
+}

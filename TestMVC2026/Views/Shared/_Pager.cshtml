@@ -1,0 +1,16 @@
+@model dynamic
+@{
+    var page = (int)Model.Page;
+    var totalPages = (int)Model.TotalPages;
+}
+@if (totalPages > 1)
+{
+    <nav aria-label="Phân trang"><ul class="pagination justify-content-end mb-0">
+        <li class="page-item @(page == 1 ? "disabled" : "")"><a class="page-link" href="@Url.Action(null, new { searchString = Model.SearchString, page = page - 1 })">Trước</a></li>
+        @for (var index = 1; index <= totalPages; index++)
+        {
+            <li class="page-item @(index == page ? "active" : "")"><a class="page-link" href="@Url.Action(null, new { searchString = Model.SearchString, page = index })">@index</a></li>
+        }
+        <li class="page-item @(page == totalPages ? "disabled" : "")"><a class="page-link" href="@Url.Action(null, new { searchString = Model.SearchString, page = page + 1 })">Sau</a></li>
+    </ul></nav>
+}

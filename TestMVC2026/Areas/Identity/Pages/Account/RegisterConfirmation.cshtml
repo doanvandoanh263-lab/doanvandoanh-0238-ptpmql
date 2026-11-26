@@ -1,0 +1,14 @@
+@page
+@model TestMVC2026.Areas.Identity.Pages.Account.RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Xác nhận đăng ký";
+}
+<div class="row justify-content-center py-4">
+    <div class="col-md-7">
+        <div class="card shadow-sm"><div class="card-body p-4">
+            <h1 class="h3">Kiểm tra email của bạn</h1>
+            <p class="mb-3">Chúng tôi đã gửi hướng dẫn xác thực đến <strong>@Model.Email</strong>, nếu dịch vụ email đã được cấu hình.</p>
+            <a asp-page="./ResendEmailConfirmation" asp-route-email="@Model.Email" class="btn btn-outline-primary">Gửi lại email xác thực</a>
+        </div></div>
+    </div>
+</div>

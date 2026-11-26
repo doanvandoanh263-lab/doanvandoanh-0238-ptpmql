@@ -1,0 +1,15 @@
+@model UserRolesViewModel
+@{
+    ViewData["Title"] = "Gán role";
+}
+<div class="mb-4"><a asp-action="Index" class="text-decoration-none">← Danh sách người dùng</a><h1 class="h2 mt-2">Gán role</h1><p class="text-muted">@Model.User.Email</p></div>
+<form asp-action="SaveRoles" method="post">
+    <input type="hidden" name="id" value="@Model.User.Id" />
+    <div class="card shadow-sm"><div class="card-body">
+        @foreach (var role in Model.Roles)
+        {
+            <div class="form-check mb-2"><input class="form-check-input" type="checkbox" name="selectedRoles" value="@role" checked="@Model.SelectedRoles.Contains(role)" id="role-@role" /><label class="form-check-label" for="role-@role">@role</label></div>
+        }
+        <button class="btn btn-primary mt-3" type="submit">Lưu role</button>
+    </div></div>
+</form>

@@ -1,0 +1,20 @@
+@model PagedResult<RoleRow>
+<div class="table-responsive"><table class="table table-hover align-middle">
+    <thead class="table-light"><tr><th>Tên role</th><th>Người dùng</th><th>Thao tác</th></tr></thead><tbody>
+    @foreach (var role in Model.Items)
+    {
+        <tr><td>@role.Name</td><td>@role.UserCount</td><td class="text-nowrap">
+            <a class="btn btn-sm btn-outline-primary" asp-action="Permissions" asp-route-roleId="@role.Id">Phân quyền</a>
+            @if (role.Name != "Admin")
+            {
+                <button class="btn btn-sm btn-outline-secondary" data-modal-url="@Url.Action("Edit", new { id = role.Id })">Sửa</button>
+                <form asp-action="Delete" asp-route-id="@role.Id" method="post" class="d-inline" data-ajax-delete data-delete-label="@role.Name">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Xóa</button>
+                </form>
+            }
+        </td></tr>
+    }
+    @if (Model.Items.Count == 0) { <tr><td colspan="3" class="text-center text-muted">Chưa có role.</td></tr> }
+    </tbody>
+</table></div>
+<partial name="_Pager" model="Model" />
