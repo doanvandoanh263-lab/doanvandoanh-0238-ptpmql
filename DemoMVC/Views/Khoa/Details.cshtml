@@ -1,0 +1,19 @@
+@model DemoMVC.Models.Khoa
+
+@{
+    ViewData["Title"] = "Chi tiết khoa";
+}
+
+<section class="page-heading">
+    <div><h1>Thông tin khoa/đơn vị</h1><p class="page-description">@Model.Name</p></div>
+    <a asp-action="Index" class="btn btn-back">Danh sách</a>
+</section>
+<section class="details-card">
+    <div class="details-code">@Model.Code</div>
+    <dl class="row details-list">
+        <dt class="col-sm-3">Mã khoa</dt><dd class="col-sm-9">@Model.Code</dd>
+        <dt class="col-sm-3">Tên khoa</dt><dd class="col-sm-9">@Model.Name</dd>
+        <dt class="col-sm-3">Sinh viên</dt><dd class="col-sm-9">@Model.Students.Count</dd>
+    </dl>
+    <a asp-action="Edit" asp-route-id="@Model.Code" class="btn btn-primary btn-create">Chỉnh sửa</a>
+</section>

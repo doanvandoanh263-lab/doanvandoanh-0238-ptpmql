@@ -1,0 +1,22 @@
+@model DemoMVC.Models.Khoa
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h2 class="modal-title fs-5">Thông tin khoa/đơn vị</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+    </div>
+    <div class="modal-body">
+        <div class="details-code">@Model.Code</div>
+        <dl class="row details-list mb-0">
+            <dt class="col-sm-4">Mã khoa</dt><dd class="col-sm-8">@Model.Code</dd>
+            <dt class="col-sm-4">Tên khoa</dt><dd class="col-sm-8">@Model.Name</dd>
+            <dt class="col-sm-4">Sinh viên</dt><dd class="col-sm-8">@Model.Students.Count</dd>
+        </dl>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-back" data-bs-dismiss="modal">Đóng</button>
+        <a asp-action="Edit" asp-route-id="@Model.Code"
+           data-modal-url="@Url.Action("Edit", new { id = Model.Code })" data-modal-title="Sửa khoa"
+           class="btn btn-primary btn-create">Chỉnh sửa</a>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+@model DemoMVC.Models.Student
+
+@{
+    ViewData["Title"] = "Sửa sinh viên";
+}
+
+<section class="page-heading">
+    <div>
+        <div class="eyebrow"><span class="eyebrow-line"></span> CẬP NHẬT HỒ SƠ</div>
+        <h1>Chỉnh sửa sinh viên</h1>
+        <p class="page-description">Cập nhật thông tin cho mã sinh viên <strong>@Model.StudentCode</strong>.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-back"><span aria-hidden="true">←</span> Danh sách</a>
+</section>
+
+<section class="form-card">
+    <form asp-action="Edit" asp-route-id="@Model.StudentCode" method="post">
+        <input type="hidden" asp-for="StudentCode" />
+        <div class="student-code-banner"><span>MÃ SINH VIÊN</span><strong>@Model.StudentCode</strong><small>Mã định danh không thể thay đổi</small></div>
+        <partial name="_StudentForm" model="Model" />
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-back">Hủy</a>
+            <button type="submit" class="btn btn-primary btn-create">Lưu thay đổi <span aria-hidden="true">→</span></button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

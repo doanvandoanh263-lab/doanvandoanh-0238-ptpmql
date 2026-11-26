@@ -16,5 +16,4 @@ namespace MvcMovie.Controllers
             return "This is the Welcome action method...";
         }
     }
-} “dotnet run”
-
+    }

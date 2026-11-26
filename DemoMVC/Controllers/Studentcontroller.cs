@@ -1,7 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Data;
 using DemoMVC.Data;
 using DemoMVC.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace DemoMVC.Controllers;
 
@@ -9,186 +11,267 @@ public class StudentController : Controller
 {
     private readonly ApplicationDbContext _context;
 
-    // Dependency Injection: Nhận ApplicationDbContext để tương tác với CSDL
     public StudentController(ApplicationDbContext context)
     {
         _context = context;
     }
 
-    // ==========================================================
-    // 1. READ (ĐỌC / TRUY VẤN DỮ LIỆU)
-    // ==========================================================
-
-    // GET: /Student hoặc /Student?searchString=abc
-    // Lấy toàn bộ danh sách sinh viên hoặc tìm kiếm theo từ khóa
-    public async Task<IActionResult> Index(string? searchString)
+    public async Task<IActionResult> Index(string? searchString, int page = 1)
     {
-        // Khởi tạo truy vấn IQueryable từ DbSet Students (chưa thực thi câu lệnh SQL)
-        var query = _context.Students.AsQueryable();
+        const int pageSize = 10;
+        var students = _context.Students
+            .Include(student => student.Khoa)
+            .AsQueryable();
 
-        // Lọc dữ liệu theo tên hoặc trường nếu người dùng nhập từ khóa tìm kiếm
         if (!string.IsNullOrWhiteSpace(searchString))
         {
-            query = query.Where(s => s.FullName.Contains(searchString) || 
-                                     (s.School != null && s.School.Contains(searchString)));
-            ViewBag.CurrentSearch = searchString;
+            var search = searchString.Trim();
+            students = students.Where(student =>
+                student.FullName.Contains(search) ||
+                student.StudentCode.Contains(search) ||
+                student.Khoa!.Name.Contains(search) ||
+                student.KhoaCode.Contains(search));
         }
 
-        // Thực thi truy vấn SQL (SELECT * FROM Students WHERE ... ORDER BY Id DESC)
-        var students = await query.OrderByDescending(s => s.Id).ToListAsync();
-        return View(students);
+        var totalCount = await students.CountAsync();
+        var totalStudentCount = await _context.Students.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        page = totalPages == 0 ? 1 : Math.Clamp(page, 1, totalPages);
+        var studentList = await students
+            .OrderBy(student => student.StudentCode)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var result = new PagedResult<Student>
+        {
+            Items = studentList,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            SearchString = searchString?.Trim()
+        };
+        ViewBag.StudentCount = totalStudentCount;
+        ViewBag.KhoaCount = await _context.Khoas.CountAsync();
+
+        return IsAjaxRequest()
+            ? PartialView("_StudentList", result)
+            : View(result);
     }
 
-    // GET: /Student/Details/5
-    // Đọc thông tin chi tiết của 1 sinh viên theo ID
-    public async Task<IActionResult> Details(int? id)
+    public async Task<IActionResult> Details(string? id)
     {
-        if (id == null)
+        if (string.IsNullOrWhiteSpace(id))
         {
             return NotFound();
         }
 
-        // EF Core: Tìm kiếm bản ghi đầu tiên khớp với điều kiện Id
         var student = await _context.Students
-            .FirstOrDefaultAsync(m => m.Id == id);
+            .Include(item => item.Khoa)
+            .FirstOrDefaultAsync(item => item.StudentCode == id);
 
         if (student == null)
         {
             return NotFound();
         }
 
-        return View(student);
+        return IsAjaxRequest()
+            ? PartialView("_StudentDetailsModal", student)
+            : View(student);
     }
 
-    // ==========================================================
-    // 2. CREATE (TẠO MỚI DỮ LIỆU)
-    // ==========================================================
-
-    // GET: /Student/Create
-    // Trả về giao diện form tạo mới
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        return View();
+        await PopulateKhoaListAsync();
+        var student = new Student();
+        return IsAjaxRequest()
+            ? PartialView("_StudentFormModal", student)
+            : View(student);
     }
 
-    // POST: /Student/Create
-    // Tiếp nhận dữ liệu từ Form và thêm mới vào Database
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("FullName,Address,School,Gender")] Student student)
+    public async Task<IActionResult> Create(
+        [Bind("FullName,EntryYear,TrainingSystemCode,MajorCode,Address,KhoaCode")] Student student)
     {
-        if (ModelState.IsValid)
+        student.FullName = student.FullName?.Trim() ?? string.Empty;
+        if (!await _context.Khoas.AnyAsync(khoa => khoa.Code == student.KhoaCode))
         {
-            // EF Core: Đưa thực thể student vào Change Tracker với trạng thái EntityState.Added
-            _context.Students.Add(student);
-
-            // EF Core: Sinh lệnh SQL INSERT INTO Students (...) VALUES (...) và thực thi
-await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = $"Đã thêm sinh viên \"{student.FullName}\" thành công!";
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError(nameof(student.KhoaCode), "Khoa được chọn không tồn tại.");
         }
 
-        // Nếu dữ liệu không hợp lệ, tải lại form cùng thông báo lỗi
-        return View(student);
-    }
-
-    // ==========================================================
-    // 3. UPDATE (CẬP NHẬT DỮ LIỆU)
-    // ==========================================================
-
-    // GET: /Student/Edit/5
-    // Lấy thông tin sinh viên hiện tại theo Id và đổ lên Form chỉnh sửa
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null)
+        if (!ModelState.IsValid)
         {
-            return NotFound();
+            await PopulateKhoaListAsync(student.KhoaCode);
+            return IsAjaxRequest()
+                ? InvalidForm("_StudentFormModal", student)
+                : View(student);
         }
 
-        // EF Core: FindAsync tìm kiếm nhanh theo Khóa chính (Primary Key)
-        var student = await _context.Students.FindAsync(id);
-        if (student == null)
+        await using var transaction =
+            await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
+        var prefix = CreatePrefix(student);
+        var existingCodes = await _context.Students
+            .Where(item => item.StudentCode.StartsWith(prefix))
+            .Select(item => item.StudentCode)
+            .ToListAsync();
+        var highestStudentNumber = existingCodes
+            .Select(code => int.TryParse(code.AsSpan(6), out var number) ? number : 0)
+            .DefaultIfEmpty(0)
+            .Max();
+
+        var counter = await _context.StudentCodeCounters
+            .SingleOrDefaultAsync(item => item.Prefix == prefix);
+        var lastNumber = Math.Max(highestStudentNumber, counter?.LastNumber ?? 0);
+        if (lastNumber >= 9999)
         {
-            return NotFound();
+            ModelState.AddModelError(string.Empty, "Dãy mã sinh viên đã vượt quá 4 chữ số cuối.");
+            await transaction.RollbackAsync();
+            await PopulateKhoaListAsync(student.KhoaCode);
+            return IsAjaxRequest()
+                ? InvalidForm("_StudentFormModal", student)
+                : View(student);
         }
 
-        return View(student);
-    }
+        var nextNumber = lastNumber + 1;
+        student.StudentCode = $"{prefix}{nextNumber:0000}";
 
-    // POST: /Student/Edit/5
-    // Nhận thông tin đã sửa từ Form và lưu cập nhật vào CSDL
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,FullName,Address,School,Gender")] Student student)
-    {
-        if (id != student.Id)
+        if (counter == null)
         {
-            return NotFound();
-        }
-
-        if (ModelState.IsValid)
-        {
-            try
+            _context.StudentCodeCounters.Add(new StudentCodeCounter
             {
-                // EF Core: Đánh dấu trạng thái thực thể là EntityState.Modified
-                _context.Students.Update(student);
-
-                // EF Core: Sinh lệnh SQL UPDATE Students SET ... WHERE Id = ...
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = $"Đã cập nhật sinh viên \"{student.FullName}\" thành công!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                // Xử lý lỗi tranh chấp dữ liệu khi bản ghi đã bị xóa/thay đổi bởi tiến trình khác
-                if (!StudentExists(student.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-        }
-
-        return View(student);
-    }
-
-    // ==========================================================
-    // 4. DELETE (XÓA DỮ LIỆU)
-    // ==========================================================
-
-    // POST: /Student/Delete/5
-    // Xóa một sinh viên theo ID
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(int id)
-    {
-        // EF Core: Tìm bản ghi cần xóa
-        var student = await _context.Students.FindAsync(id);
-        if (student != null)
-        {
-            // EF Core: Đánh dấu trạng thái thực thể là EntityState.Deleted
-            _context.Students.Remove(student);
-// EF Core: Sinh lệnh SQL DELETE FROM Students WHERE Id = ...
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = $"Đã xóa sinh viên \"{student.FullName}\" thành công!";
+                Prefix = prefix,
+                LastNumber = nextNumber
+            });
         }
         else
         {
-            TempData["ErrorMessage"] = "Không tìm thấy sinh viên cần xóa!";
+            counter.LastNumber = nextNumber;
         }
 
+        _context.Students.Add(student);
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        var message = $"Đã thêm sinh viên {student.FullName} với mã {student.StudentCode}.";
+        if (IsAjaxRequest())
+        {
+            return Json(new { success = true, message });
+        }
+
+        TempData["SuccessMessage"] = message;
         return RedirectToAction(nameof(Index));
     }
 
-    // Phương thức phụ: Kiểm tra sinh viên có tồn tại trong CSDL hay không
-    private bool StudentExists(int id)
+    public async Task<IActionResult> Edit(string? id)
     {
-        return _context.Students.Any(e => e.Id == id);
+        if (string.IsNullOrWhiteSpace(id))
+        {
+            return NotFound();
+        }
+
+        var student = await _context.Students.FindAsync(id);
+        if (student == null)
+        {
+            return NotFound();
+        }
+
+        await PopulateKhoaListAsync(student.KhoaCode);
+        return IsAjaxRequest()
+            ? PartialView("_StudentFormModal", student)
+            : View(student);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(
+        string id,
+        [Bind("StudentCode,FullName,EntryYear,TrainingSystemCode,MajorCode,Address,KhoaCode")] Student student)
+    {
+        if (id != student.StudentCode)
+        {
+            return NotFound();
+        }
+
+        if (!await _context.Khoas.AnyAsync(khoa => khoa.Code == student.KhoaCode))
+        {
+            ModelState.AddModelError(nameof(student.KhoaCode), "Khoa được chọn không tồn tại.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await PopulateKhoaListAsync(student.KhoaCode);
+            return IsAjaxRequest()
+                ? InvalidForm("_StudentFormModal", student)
+                : View(student);
+        }
+
+        try
+        {
+            _context.Students.Update(student);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!await _context.Students.AnyAsync(item => item.StudentCode == student.StudentCode))
+            {
+                return NotFound();
+            }
+
+            throw;
+        }
+
+        var message = $"Đã cập nhật sinh viên {student.FullName}.";
+        if (IsAjaxRequest())
+        {
+            return Json(new { success = true, message });
+        }
+
+        TempData["SuccessMessage"] = message;
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(string id)
+    {
+        var student = await _context.Students.FindAsync(id);
+        if (student == null)
+        {
+            return NotFound();
+        }
+
+        _context.Students.Remove(student);
+        await _context.SaveChangesAsync();
+        var message = $"Đã xóa sinh viên {student.FullName}.";
+        if (IsAjaxRequest())
+        {
+            return Json(new { success = true, message });
+        }
+
+        TempData["SuccessMessage"] = message;
+        return RedirectToAction(nameof(Index));
+    }
+
+    private async Task PopulateKhoaListAsync(string? selectedCode = null)
+    {
+        ViewBag.KhoaCode = new SelectList(
+            await _context.Khoas.OrderBy(khoa => khoa.Name).ToListAsync(),
+            nameof(Khoa.Code),
+            nameof(Khoa.Name),
+            selectedCode);
+    }
+
+    private static string CreatePrefix(Student student) =>
+        $"{student.EntryYear % 100:00}{student.TrainingSystemCode}{student.MajorCode}";
+
+    private bool IsAjaxRequest() =>
+        string.Equals(Request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase);
+
+    private IActionResult InvalidForm(string viewName, Student student)
+    {
+        Response.StatusCode = StatusCodes.Status400BadRequest;
+        return PartialView(viewName, student);
     }
 }

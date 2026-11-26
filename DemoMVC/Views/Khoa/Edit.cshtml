@@ -1,0 +1,25 @@
+@model DemoMVC.Models.Khoa
+
+@{
+    ViewData["Title"] = "Sửa khoa";
+    ViewData["IsEdit"] = true;
+}
+
+<section class="page-heading">
+    <div><h1>Sửa khoa/đơn vị</h1><p class="page-description">Cập nhật thông tin @Model.Name.</p></div>
+    <a asp-action="Index" class="btn btn-back">Danh sách</a>
+</section>
+<section class="form-card">
+    <form asp-action="Edit" asp-route-id="@Model.Code" method="post">
+        <input type="hidden" asp-for="Code" />
+        <partial name="_KhoaForm" model="Model" />
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-back">Hủy</a>
+            <button type="submit" class="btn btn-primary btn-create">Lưu thay đổi</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,20 @@
+@model DemoMVC.Models.Khoa
+
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div class="mb-3">
+    <label asp-for="Code" class="form-label"></label>
+    @if (ViewData["IsEdit"] as bool? == true)
+    {
+        <input value="@Model.Code" class="form-control" readonly />
+    }
+    else
+    {
+        <input asp-for="Code" class="form-control" placeholder="Ví dụ: CNTT" />
+    }
+    <span asp-validation-for="Code" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Name" class="form-label"></label>
+    <input asp-for="Name" class="form-control" placeholder="Nhập tên khoa/đơn vị" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>

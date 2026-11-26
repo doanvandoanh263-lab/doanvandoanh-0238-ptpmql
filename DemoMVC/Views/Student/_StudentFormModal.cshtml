@@ -1,0 +1,27 @@
+@model DemoMVC.Models.Student
+
+@{
+    var isEdit = !string.IsNullOrEmpty(Model.StudentCode);
+}
+
+<div class="modal-content">
+    <form asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@Model.StudentCode" method="post" data-ajax-form>
+        @Html.AntiForgeryToken()
+        <div class="modal-header">
+            <h2 class="modal-title fs-5">@(isEdit ? "Sửa thông tin sinh viên" : "Thêm sinh viên")</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+            @if (isEdit)
+            {
+                <input type="hidden" asp-for="StudentCode" />
+                <div class="student-code-banner"><span>MÃ SINH VIÊN</span><strong>@Model.StudentCode</strong><small>Mã định danh không thể thay đổi</small></div>
+            }
+            <partial name="_StudentForm" model="Model" />
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-back" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-create">@(isEdit ? "Lưu thay đổi" : "Lưu hồ sơ")</button>
+        </div>
+    </form>
+</div>

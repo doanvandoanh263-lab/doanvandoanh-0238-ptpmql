@@ -1,0 +1,82 @@
+@model DemoMVC.Models.PagedResult<DemoMVC.Models.Student>
+
+<div class="table-responsive student-table-wrap">
+    <table class="table student-table align-middle">
+        <thead>
+            <tr>
+                <th>MÃ SINH VIÊN</th>
+                <th>HỌ VÀ TÊN</th>
+                <th>NĂM NHẬP HỌC</th>
+                <th>HỆ / NGÀNH</th>
+                <th>KHOA</th>
+                <th class="text-end">THAO TÁC</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var student in Model.Items)
+        {
+            <tr>
+                <td><span class="student-code">@student.StudentCode</span></td>
+                <td>
+                    <div class="student-name-cell">
+                        <span class="student-avatar">@student.FullName.Trim().Substring(0, 1).ToUpperInvariant()</span>
+                        <span class="student-name">@student.FullName</span>
+                    </div>
+                </td>
+                <td><span class="year-pill">@student.EntryYear</span></td>
+                <td><span class="program-code">@student.TrainingSystemCode</span><span class="code-divider">/</span><span class="program-code">@student.MajorCode</span></td>
+                <td><span class="faculty-name">@student.Khoa?.Name</span></td>
+                <td>
+                    <div class="table-actions">
+                        <a asp-action="Details" asp-route-id="@student.StudentCode" class="action-link"
+                           data-modal-url="@Url.Action("Details", new { id = student.StudentCode })" data-modal-title="Thông tin sinh viên"
+                           aria-label="Xem @student.FullName">Xem</a>
+                        <a asp-action="Edit" asp-route-id="@student.StudentCode" class="action-link"
+                           data-modal-url="@Url.Action("Edit", new { id = student.StudentCode })" data-modal-title="Sửa sinh viên"
+                           aria-label="Sửa @student.FullName">Sửa</a>
+                        <form asp-action="Delete" asp-route-id="@student.StudentCode" method="post" class="d-inline"
+                              data-ajax-delete data-delete-label="@student.FullName">
+                            <button type="submit" class="action-link action-delete" aria-label="Xóa @student.FullName">Xóa</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    @if (Model.Items.Count == 0)
+    {
+        <div class="empty-state">
+            <span class="empty-icon">SV</span>
+            <h3>@(string.IsNullOrWhiteSpace(Model.SearchString) ? "Chưa có hồ sơ sinh viên" : "Không tìm thấy sinh viên")</h3>
+            <p>@(string.IsNullOrWhiteSpace(Model.SearchString) ? "Thêm sinh viên mới để bắt đầu quản lý danh sách." : "Thử đổi từ khóa tìm kiếm.")</p>
+            @if (string.IsNullOrWhiteSpace(Model.SearchString))
+            {
+                <a asp-action="Create" class="btn btn-primary" data-modal-url="@Url.Action("Create")" data-modal-title="Thêm sinh viên">Thêm sinh viên đầu tiên</a>
+            }
+        </div>
+    }
+</div>
+<div class="table-footnote">
+    <span>Hiển thị <strong>@Model.FirstItem–@Model.LastItem</strong> / <strong>@Model.TotalCount</strong> sinh viên</span>
+    <span>Mã sinh viên được tạo tự động theo năm, hệ đào tạo và ngành học.</span>
+</div>
+@if (Model.TotalPages > 1)
+{
+    <nav class="grid-pagination" aria-label="Phân trang sinh viên">
+        <ul class="pagination mb-0">
+            <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                <a class="page-link" asp-controller="Student" asp-action="Index" asp-route-page="@(Model.Page - 1)" asp-route-searchString="@Model.SearchString" aria-label="Trang trước">‹</a>
+            </li>
+            @for (var pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
+            {
+                <li class="page-item @(pageNumber == Model.Page ? "active" : "")">
+                    <a class="page-link" asp-controller="Student" asp-action="Index" asp-route-page="@pageNumber" asp-route-searchString="@Model.SearchString">@pageNumber</a>
+                </li>
+            }
+            <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                <a class="page-link" asp-controller="Student" asp-action="Index" asp-route-page="@(Model.Page + 1)" asp-route-searchString="@Model.SearchString" aria-label="Trang sau">›</a>
+            </li>
+        </ul>
+    </nav>
+}

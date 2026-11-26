@@ -1,0 +1,26 @@
+@model DemoMVC.Models.Student
+
+<div class="modal-content">
+    <div class="modal-header">
+        <h2 class="modal-title fs-5">Thông tin sinh viên</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+    </div>
+    <div class="modal-body">
+        <div class="details-code">@Model.StudentCode</div>
+        <dl class="row details-list mb-0">
+            <dt class="col-sm-4">Mã sinh viên</dt><dd class="col-sm-8">@Model.StudentCode</dd>
+            <dt class="col-sm-4">Họ và tên</dt><dd class="col-sm-8">@Model.FullName</dd>
+            <dt class="col-sm-4">Năm nhập học</dt><dd class="col-sm-8">@Model.EntryYear</dd>
+            <dt class="col-sm-4">Hệ đào tạo</dt><dd class="col-sm-8">@Model.TrainingSystemCode</dd>
+            <dt class="col-sm-4">Mã ngành</dt><dd class="col-sm-8">@Model.MajorCode</dd>
+            <dt class="col-sm-4">Địa chỉ</dt><dd class="col-sm-8">@Model.Address</dd>
+            <dt class="col-sm-4">Khoa</dt><dd class="col-sm-8">@Model.Khoa?.Name (@Model.KhoaCode)</dd>
+        </dl>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-back" data-bs-dismiss="modal">Đóng</button>
+        <a asp-action="Edit" asp-route-id="@Model.StudentCode"
+           data-modal-url="@Url.Action("Edit", new { id = Model.StudentCode })" data-modal-title="Sửa sinh viên"
+           class="btn btn-primary btn-create">Chỉnh sửa</a>
+    </div>
+</div>

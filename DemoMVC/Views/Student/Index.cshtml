@@ -1,0 +1,67 @@
+@model DemoMVC.Models.PagedResult<DemoMVC.Models.Student>
+
+@{
+    ViewData["Title"] = "Danh sách sinh viên";
+}
+
+<section class="page-heading">
+    <div>
+        <div class="eyebrow"><span class="eyebrow-line"></span> CỔNG QUẢN LÝ ĐÀO TẠO</div>
+        <h1>Quản lý sinh viên</h1>
+        <p class="page-description">Theo dõi hồ sơ, thông tin đào tạo và đơn vị trực thuộc.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary btn-create" data-modal-url="@Url.Action("Create")" data-modal-title="Thêm sinh viên">
+        <span class="plus-mark">+</span> Thêm sinh viên
+    </a>
+</section>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Thành công.</strong> @successMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
+}
+
+<section class="stat-grid" aria-label="Tổng quan">
+    <article class="stat-card">
+        <div class="stat-icon stat-icon-blue"><span>SV</span></div>
+        <div><span class="stat-label">Sinh viên</span><strong class="stat-number">@ViewBag.StudentCount</strong></div>
+        <span class="stat-caption">Hồ sơ trong danh sách</span>
+    </article>
+    <article class="stat-card">
+        <div class="stat-icon stat-icon-gold"><span>KH</span></div>
+        <div><span class="stat-label">Khoa &amp; đơn vị</span><strong class="stat-number">@ViewBag.KhoaCount</strong></div>
+        <span class="stat-caption">Đơn vị đào tạo HUMG</span>
+    </article>
+    <article class="stat-card stat-card-note">
+        <div class="stat-icon stat-icon-green"><span>01</span></div>
+        <div><span class="stat-label">Tạo hồ sơ mới</span><strong class="stat-number stat-number-text">Nhanh chóng</strong></div>
+        <a asp-action="Create" data-modal-url="@Url.Action("Create")" data-modal-title="Thêm sinh viên" class="stat-caption stat-action">Tạo sinh viên mới <span aria-hidden="true">→</span></a>
+    </article>
+</section>
+
+<section class="content-card">
+    <div class="section-heading">
+        <div>
+            <h2>Danh sách sinh viên</h2>
+            <p>Tra cứu và quản lý hồ sơ sinh viên trong hệ thống.</p>
+        </div>
+    </div>
+    <form action="@Url.Content("~/Student")" method="get" class="search-toolbar" data-grid-search>
+        <div class="search-field">
+            <span class="search-icon" aria-hidden="true"></span>
+            <input type="search" name="searchString" value="@Model.SearchString"
+                   class="form-control" placeholder="Tìm theo mã sinh viên, họ tên hoặc khoa..." aria-label="Tìm kiếm sinh viên" />
+        </div>
+        <button type="submit" class="btn btn-search">Tìm kiếm</button>
+        @if (!string.IsNullOrWhiteSpace(Model.SearchString))
+        {
+            <a href="@Url.Content("~/Student")" class="btn btn-clear-search" data-grid-clear>Xóa bộ lọc</a>
+        }
+    </form>
+
+    <div id="grid-results" data-grid-results>
+        <partial name="_StudentList" model="Model" />
+    </div>
+</section>

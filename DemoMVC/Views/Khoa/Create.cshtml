@@ -1,0 +1,23 @@
+@model DemoMVC.Models.Khoa
+
+@{
+    ViewData["Title"] = "Thêm khoa";
+}
+
+<section class="page-heading">
+    <div><h1>Thêm khoa/đơn vị</h1><p class="page-description">Tạo đơn vị đào tạo mới.</p></div>
+    <a asp-action="Index" class="btn btn-back">Danh sách</a>
+</section>
+<section class="form-card">
+    <form asp-action="Create" method="post">
+        <partial name="_KhoaForm" model="Model" />
+        <div class="form-actions">
+            <a asp-action="Index" class="btn btn-back">Hủy</a>
+            <button type="submit" class="btn btn-primary btn-create">Lưu khoa</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

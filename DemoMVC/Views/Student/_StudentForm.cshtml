@@ -1,0 +1,56 @@
+@model DemoMVC.Models.Student
+
+<div class="form-section">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="form-section-heading">
+        <span class="form-step">01</span>
+        <div><h2>Thông tin cá nhân</h2><p>Nhập thông tin cơ bản của sinh viên.</p></div>
+    </div>
+    <div class="row">
+        <div class="col-12 mb-3">
+            <label asp-for="FullName" class="form-label"></label>
+            <input asp-for="FullName" class="form-control" placeholder="Ví dụ: Nguyễn Văn An" />
+            <span asp-validation-for="FullName" class="text-danger"></span>
+        </div>
+        <div class="col-12 mb-3">
+            <label asp-for="Address" class="form-label"></label>
+            <input asp-for="Address" class="form-control" placeholder="Nhập địa chỉ hiện tại" />
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="form-section">
+    <div class="form-section-heading">
+        <span class="form-step">02</span>
+        <div><h2>Thông tin đào tạo</h2><p>Mã sinh viên sẽ được sinh tự động từ các thông tin dưới đây.</p></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="EntryYear" class="form-label"></label>
+            <input asp-for="EntryYear" class="form-control" />
+            <span asp-validation-for="EntryYear" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="TrainingSystemCode" class="form-label"></label>
+            <input asp-for="TrainingSystemCode" class="form-control" />
+            <span asp-validation-for="TrainingSystemCode" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="MajorCode" class="form-label"></label>
+            <input asp-for="MajorCode" class="form-control" />
+            <span asp-validation-for="MajorCode" class="text-danger"></span>
+        </div>
+        <div class="col-12 mb-3">
+            <label asp-for="KhoaCode" class="form-label"></label>
+            <select asp-for="KhoaCode" asp-items="ViewBag.KhoaCode" class="form-select">
+                <option value="">-- Chọn khoa --</option>
+            </select>
+            <span asp-validation-for="KhoaCode" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="code-preview">
+        <span class="code-preview-icon">#</span>
+        <span>Mã sinh viên được tạo tự động khi lưu. Mã mốc <strong>2121050238</strong> sẽ tiếp tục từ <strong>2121050239</strong>.</span>
+    </div>
+</div>

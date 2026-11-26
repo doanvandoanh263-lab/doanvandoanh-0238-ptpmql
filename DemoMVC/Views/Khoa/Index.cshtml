@@ -1,0 +1,49 @@
+@model DemoMVC.Models.PagedResult<DemoMVC.Models.Khoa>
+
+@{
+    ViewData["Title"] = "Danh sách khoa";
+}
+
+<section class="page-heading">
+    <div>
+        <div class="eyebrow"><span class="eyebrow-line"></span> CƠ CẤU TỔ CHỨC</div>
+        <h1>Khoa &amp; đơn vị</h1>
+        <p class="page-description">Danh sách các đơn vị đào tạo thuộc Trường Đại học Mỏ - Địa chất.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary btn-create" data-modal-url="@Url.Action("Create")" data-modal-title="Thêm khoa">
+        <span class="plus-mark">+</span> Thêm khoa
+    </a>
+</section>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Thành công.</strong> @successMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+    </div>
+}
+@if (Context.Request.Query["error"].Count > 0)
+{
+    <div class="alert alert-danger" role="alert">@Context.Request.Query["error"]</div>
+}
+
+<section class="content-card faculty-content-card">
+    <div class="section-heading">
+        <div><h2>Danh sách khoa &amp; đơn vị</h2><p>Tìm kiếm và quản lý các đơn vị đào tạo.</p></div>
+    </div>
+    <form action="@Url.Content("~/Khoa")" method="get" class="search-toolbar" data-grid-search>
+        <div class="search-field">
+            <span class="search-icon" aria-hidden="true"></span>
+            <input type="search" name="searchString" value="@Model.SearchString"
+                   class="form-control" placeholder="Tìm theo mã hoặc tên khoa..." aria-label="Tìm kiếm khoa" />
+        </div>
+        <button type="submit" class="btn btn-search">Tìm kiếm</button>
+        @if (!string.IsNullOrWhiteSpace(Model.SearchString))
+        {
+            <a href="@Url.Content("~/Khoa")" class="btn btn-clear-search" data-grid-clear>Xóa bộ lọc</a>
+        }
+    </form>
+    <div id="grid-results" data-grid-results>
+        <partial name="_KhoaList" model="Model" />
+    </div>
+</section>

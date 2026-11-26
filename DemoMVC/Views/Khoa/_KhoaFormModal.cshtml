@@ -1,0 +1,27 @@
+@model DemoMVC.Models.Khoa
+
+@{
+    var isEdit = !string.IsNullOrEmpty(Model.Code);
+}
+
+<div class="modal-content">
+    <form asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@Model.Code" method="post" data-ajax-form>
+        @Html.AntiForgeryToken()
+        <div class="modal-header">
+            <h2 class="modal-title fs-5">@(isEdit ? "Sửa khoa/đơn vị" : "Thêm khoa/đơn vị")</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+            @if (isEdit)
+            {
+                <input type="hidden" asp-for="Code" />
+                ViewData["IsEdit"] = true;
+            }
+            <partial name="_KhoaForm" model="Model" />
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-back" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-create">@(isEdit ? "Lưu thay đổi" : "Lưu khoa")</button>
+        </div>
+    </form>
+</div>

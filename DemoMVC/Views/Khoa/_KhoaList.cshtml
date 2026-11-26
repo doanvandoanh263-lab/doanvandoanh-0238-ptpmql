@@ -1,0 +1,57 @@
+@model DemoMVC.Models.PagedResult<DemoMVC.Models.Khoa>
+
+<div class="faculty-grid">
+    @foreach (var khoa in Model.Items)
+    {
+        <article class="faculty-card">
+            <div class="faculty-card-top">
+                <span class="faculty-code">@khoa.Code</span>
+                <a asp-action="Details" asp-route-id="@khoa.Code" class="faculty-arrow" aria-label="Xem @khoa.Name"
+                   data-modal-url="@Url.Action("Details", new { id = khoa.Code })" data-modal-title="Thông tin khoa">↗</a>
+            </div>
+            <h2>@khoa.Name</h2>
+            <div class="faculty-card-bottom">
+                <span class="faculty-student-icon">SV</span>
+                <span><strong>@khoa.Students.Count</strong> sinh viên</span>
+                <div class="table-actions ms-auto">
+                    <a asp-action="Edit" asp-route-id="@khoa.Code" class="action-link"
+                       data-modal-url="@Url.Action("Edit", new { id = khoa.Code })" data-modal-title="Sửa khoa">Sửa</a>
+                    <form asp-action="Delete" asp-route-id="@khoa.Code" method="post" class="d-inline"
+                          data-ajax-delete data-delete-label="@khoa.Name">
+                        <button type="submit" class="action-link action-delete" aria-label="Xóa @khoa.Name">Xóa</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+    }
+</div>
+<div class="table-footnote">
+    <span>Hiển thị <strong>@Model.FirstItem–@Model.LastItem</strong> / <strong>@Model.TotalCount</strong> đơn vị</span>
+</div>
+@if (Model.Items.Count == 0)
+{
+    <div class="empty-state">
+        <span class="empty-icon">KH</span>
+        <h3>@(string.IsNullOrWhiteSpace(Model.SearchString) ? "Chưa có khoa/đơn vị" : "Không tìm thấy khoa/đơn vị")</h3>
+        <p>@(string.IsNullOrWhiteSpace(Model.SearchString) ? "Thêm đơn vị mới để bắt đầu quản lý." : "Thử đổi từ khóa tìm kiếm.")</p>
+    </div>
+}
+@if (Model.TotalPages > 1)
+{
+    <nav class="grid-pagination" aria-label="Phân trang khoa">
+        <ul class="pagination mb-0">
+            <li class="page-item @(Model.Page == 1 ? "disabled" : "")">
+                <a class="page-link" asp-controller="Khoa" asp-action="Index" asp-route-page="@(Model.Page - 1)" asp-route-searchString="@Model.SearchString" aria-label="Trang trước">‹</a>
+            </li>
+            @for (var pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
+            {
+                <li class="page-item @(pageNumber == Model.Page ? "active" : "")">
+                    <a class="page-link" asp-controller="Khoa" asp-action="Index" asp-route-page="@pageNumber" asp-route-searchString="@Model.SearchString">@pageNumber</a>
+                </li>
+            }
+            <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : "")">
+                <a class="page-link" asp-controller="Khoa" asp-action="Index" asp-route-page="@(Model.Page + 1)" asp-route-searchString="@Model.SearchString" aria-label="Trang sau">›</a>
+            </li>
+        </ul>
+    </nav>
+}
